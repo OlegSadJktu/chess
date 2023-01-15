@@ -1,12 +1,12 @@
 TARGET = chess
 
-SRCS = main.c field.h field.c figures.h figures.c printer.h printer.c 
+SRCS = main.c field.h field.c figures.h figures.c printer.h printer.c logger.h logger.c
 OBJS = $(SRCS:.c=.o)
 
-LDLIBS = -lncursesw
+LDLIBS = -lncursesw -lm
 
 # OJBS = $(OJBS:.h=.o)
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 
 .PHONY: all clean
 

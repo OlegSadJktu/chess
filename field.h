@@ -6,20 +6,25 @@
 
 #define FIELD_SIZE 64
 
+enum CursorMode {
+    NORMAL, SELECT,
+};
+
 struct Cell {
     struct Figure *piece;
 };
 
 struct Field {
-    /* char name[20]; */
     struct Cell cells[FIELD_SIZE];
     int curx, cury;
+    // default -1
+    int selectedPiece;
 
 };
 
-typedef struct Pos {
+struct Pos {
     int x, y;
-} Pos;
+};
 
 struct Field *createDefaultField();
 
@@ -27,7 +32,10 @@ int posToIndex(int x, int y);
 
 int charsToIndex(char[2]);
 
-int indexToPos(int, int*, int*);
+int indexToPos(int, struct Pos*);
 
+void selectF(struct Field*);
+
+int samePos(struct Pos *p1, struct Pos *p2);
 
 #endif

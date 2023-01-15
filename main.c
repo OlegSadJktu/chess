@@ -4,11 +4,15 @@
 #include <locale.h>
 #include <curses.h>
 #include "printer.h"
+#include "logger.h"
 
 
 
-void moveCursor(struct Field *field, char ch) {
+void eventHandler(struct Field *field, char ch) {
     switch (ch) {
+        case ' ':
+            selectF(field);
+            return;
         case 'j':
             if (field->cury < 7)
                 field->cury++;
@@ -36,21 +40,26 @@ int main() {
     /* printf("%p\n", field); */
     initscr();
     start_color();
-    init_pair(1, COLOR_YELLOW, COLOR_WHITE);
+    init_pair(CURSOR_COLOR, COLOR_YELLOW, COLOR_WHITE);
+    init_pair(MOVE_COLOR, COLOR_RED, COLOR_GREEN);
+    init_pair(CAN_MOVE, COLOR_BLACK, COLOR_YELLOW);
     getmaxyx(stdscr, maxy, maxx);
-    char ch;
+    setMaxxy(maxx, maxy);
+    char ch = 0;
 
     struct Field *field = createDefaultField();
 
     curs_set(0);
-    printField(maxx, maxy, field);
-    while ((ch = getch()) != 'q') {
-        clear();
-        moveCursor(field, ch);
-        printField(maxx, maxy, field);
+    /* printField(maxx, maxy, field); */
 
+    do {
+        clear();
+        eventHandler(field, ch);
+        printField(maxx, maxy, field);
         refresh();
-    }
+
+    } while ((ch = getch()) != 'q');
+    
     endwin();
 
 }
