@@ -56,6 +56,15 @@ static void printFigure(struct Figure *piece, struct Pos *pos) {
     addch(c);
 }
 
+void disableColors() {
+    attroff(COLOR_PAIR(CURSOR_COLOR));
+    /* attroff(COLOR_PAIR(MOVE_COLOR)); */
+    /* attroff(COLOR_PAIR(CAN_MOVE)); */
+    /* attroff(COLOR_PAIR(CAN_ATTACK)); */
+    /* attroff(COLOR_PAIR(ATTACK_COLOR)); */
+
+}
+
 static void printCell(Offsets *off, int index, struct Field *field) {
     struct Figure *pieceOnCell = field->cells[index].piece;
     int top = off->top, left = off->left;
@@ -74,14 +83,22 @@ static void printCell(Offsets *off, int index, struct Field *field) {
         attron(COLOR_PAIR(CURSOR_COLOR));
     }
     if (pieceOnCell != NULL) {
+        if (piece != NULL) {
+            checker_f f = checkerAttack(piece->type);
+            if (f(&selectedPiecePos, &indPos, field, piece->team)) {
+                if (samePos(&indPos, &curPos)) {
+                    attron(COLOR_PAIR(ATTACK_COLOR));
+                } else {
+                    attron(COLOR_PAIR(CAN_ATTACK));
+                }
+            }
+
+        }
         printFigure(pieceOnCell, &indPos);
     } else {
         if (field->selectedPiece > -1) {
-            /* attron(COLOR_PAIR(MOVE_COLOR)); */
-            /* indexToPos(field->selectedPiece, &x, &y); */
-            /* struct Pos pos = {x, y}, move = {pieceX, pieceY}; */
             checker_f f = checker(piece->type);
-            if ( f(&selectedPiecePos, &indPos)) {
+            if ( f(&selectedPiecePos, &indPos, field, piece->team)) {
                 if (samePos(&indPos, &curPos)) {
                     attron(COLOR_PAIR(CAN_MOVE));
 
@@ -93,10 +110,9 @@ static void printCell(Offsets *off, int index, struct Field *field) {
 
         mvaddstr(top + indPos.y , left + (2 * indPos.x) , "  ");
     }
-    attroff(COLOR_PAIR(CURSOR_COLOR));
-    attroff(COLOR_PAIR(MOVE_COLOR));
-    attroff(COLOR_PAIR(CAN_MOVE));
+    disableColors();
 }
+
 
 void printField(int maxx, int maxy, struct Field *field) {
     printFieldBounds(maxx, maxy);

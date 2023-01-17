@@ -3,8 +3,10 @@
 
 #include <stdlib.h>
 #include "figures.h"
+#include "logger.h"
 
 #define FIELD_SIZE 64
+#define SIDE_SIZE 8
 
 enum CursorMode {
     NORMAL, SELECT,
@@ -30,6 +32,8 @@ struct Field *createDefaultField();
 
 int posToIndex(int x, int y);
 
+int possToIndex(struct Pos*);
+
 int charsToIndex(char[2]);
 
 int indexToPos(int, struct Pos*);
@@ -37,5 +41,7 @@ int indexToPos(int, struct Pos*);
 void selectF(struct Field*);
 
 int samePos(struct Pos *p1, struct Pos *p2);
+
+void attack(struct Field *field, struct Pos *attacking, struct Pos *attacked);
 
 #endif

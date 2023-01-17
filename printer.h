@@ -9,6 +9,8 @@
 #define CURSOR_COLOR 1
 #define MOVE_COLOR 2
 #define CAN_MOVE 3
+#define CAN_ATTACK 4
+#define ATTACK_COLOR 5
 
 void setMaxxy(int x, int y) ;
 

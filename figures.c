@@ -18,6 +18,16 @@ char getCharByType(enum FigureType type) {
     return -1;
 }
 
+char *getNameByTeam(enum Team team) {
+    switch(team) {
+        case WHITE:
+            return "WHITE";
+        case BLACK:
+            return "BLACK";
+    }
+    return "ERROR";
+}
+
 
 static void deltas(struct Pos *p1, struct Pos *p2, int *dx, int *dy) {
     *dy = p1->y - p2->y;
@@ -35,17 +45,18 @@ int samePos(struct Pos *p1, struct Pos *p2) {
     return p1->x == p2->x && p1->y == p2->y;
 }
 
-static int pawnMoveChecker(struct Pos *pos, struct Pos *move) {
+static int pawnMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
     int dx, dy;
     deltas(pos, move, &dx, &dy);
+    dy = dy * (team == WHITE ? 1 : -1);
     if (dy == 1 && dx == 0) {
         return 1;
     }
     return 0;
 }
 
-int kingMoveChecker(struct Pos *pos, struct Pos *move) {
+int kingMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
     int dx = pos->x - move->x, dy = pos->y - move->y;
     dx = abs(dx);
@@ -57,7 +68,7 @@ int kingMoveChecker(struct Pos *pos, struct Pos *move) {
 }
 
 
-static int rookMoveChecker(struct Pos *pos, struct Pos *move) {
+static int rookMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
     int dx, dy;
     absDeltas(pos, move, &dx, &dy);
@@ -67,7 +78,7 @@ static int rookMoveChecker(struct Pos *pos, struct Pos *move) {
     return 0;
 }
 
-static int bishopMoveChecker(struct Pos *pos, struct Pos *move) {
+static int bishopMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
     int dx, dy;
     absDeltas(pos, move, &dx, &dy);
@@ -77,15 +88,15 @@ static int bishopMoveChecker(struct Pos *pos, struct Pos *move) {
     return 0;
 }
 
-static int queenMoveChecker(struct Pos *pos, struct Pos *move) {
+static int queenMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
-    if (rookMoveChecker(pos, move) || bishopMoveChecker(pos, move)) {
+    if (rookMoveChecker(pos, move, field, team) || bishopMoveChecker(pos, move, field, team)) {
         return 1;
     }
     return 0;
 }
 
-static int horseMoveChecker(struct Pos *pos, struct Pos *move) {
+static int horseMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
     int dx = pos->x - move->x;
     int dy = pos->y - move->y;
@@ -97,14 +108,71 @@ static int horseMoveChecker(struct Pos *pos, struct Pos *move) {
     return 0;
 }
 
-static int allMoveAllowed(struct Pos *pos, struct Pos *move) {
+static int allMoveAllowed(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
     return 1;
 }
 
+static int pawnAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
+    enum Team eTeam = field->cells[possToIndex(move)].piece->team;
+    // if same team
+    if (eTeam == team) return 0;
+    int dx, dy;
+    deltas(pos, move, &dx, &dy);
+    dy = dy * (team == WHITE ? 1 : -1);
+    if ((dx == -1 && dy == 1) || (dx == 1 && dy == 1)) {
+        return 1;
+    }
+    return 0;
+}
+
+static int kingAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
+    enum Team eTeam = field->cells[possToIndex(move)].piece->team;
+    return eTeam != team && kingMoveChecker(pos, move, field, team);
+}
+
+static int queenAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
+    enum Team eTeam = field->cells[possToIndex(move)].piece->team;
+    return eTeam != team && queenMoveChecker(pos, move, field, team);
+}
+
+static int bishopAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
+    enum Team eTeam = field->cells[possToIndex(move)].piece->team;
+    return eTeam != team && bishopMoveChecker(pos, move, field, team);
+
+}
+
+static int rookAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
+    enum Team eTeam = field->cells[possToIndex(move)].piece->team;
+    return eTeam != team && rookMoveChecker(pos, move, field, team);
+
+}
+
+static int horseAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
+    enum Team eTeam = field->cells[possToIndex(move)].piece->team;
+    return eTeam != team && horseMoveChecker(pos, move, field, team);
+
+}
+
+checker_f checkerAttack(enum FigureType type) {
+    switch (type) {
+        case PAWN:
+            return pawnAttackChecker;
+        case KING:
+            return kingAttackChecker;
+        case QUEEN:
+            return queenAttackChecker;
+        case BISHOP:
+            return bishopAttackChecker;
+        case ROOK:
+            return rookAttackChecker;
+        case HORSE:
+            return horseAttackChecker;
+    }
+    return allMoveAllowed;
+}
 
 checker_f checker(enum FigureType type) {
-/* int (*checker(enum FigureType type))(Pos*, Pos *) { */
     switch (type) {
         case PAWN:
             return pawnMoveChecker;
@@ -122,8 +190,4 @@ checker_f checker(enum FigureType type) {
     return allMoveAllowed;
 }
 
-/* int (*checker(enum FigureType type))(Pos, Pos) { */
-/*     return pawnMoveChecker; */
-
-/* } */
 

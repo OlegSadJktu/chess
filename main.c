@@ -5,26 +5,32 @@
 #include <curses.h>
 #include "printer.h"
 #include "logger.h"
+#include <signal.h>
 
 
 
-void eventHandler(struct Field *field, char ch) {
+void eventHandler(struct Field *field, int ch) {
     switch (ch) {
+        case '\n':
         case ' ':
             selectF(field);
             return;
+        case 's':
         case 'j':
             if (field->cury < 7)
                 field->cury++;
             return;
+        case 'w':
         case 'k':
             if (field->cury > 0)
             field->cury--;
             return;
+        case 'a':
         case 'h':
             if (field->curx > 0)
             field->curx--;
             return;
+        case 'd':
         case 'l':
             if (field->curx < 7)
             field->curx++;
@@ -33,16 +39,25 @@ void eventHandler(struct Field *field, char ch) {
 
 }
 
+void sighandler(int sig) {
+    endwin();
+    logInfo("Core dumped");
+    signal(sig, SIG_DFL);
+}
+
 int main() {
     int maxx, maxy;
     setlocale(LC_ALL, "");
     /* struct Field *field = malloc(sizeof(struct Field)); */
     /* printf("%p\n", field); */
+    signal(SIGSEGV, sighandler);
     initscr();
     start_color();
     init_pair(CURSOR_COLOR, COLOR_YELLOW, COLOR_WHITE);
     init_pair(MOVE_COLOR, COLOR_RED, COLOR_GREEN);
     init_pair(CAN_MOVE, COLOR_BLACK, COLOR_YELLOW);
+    init_pair(CAN_ATTACK, COLOR_BLACK, COLOR_MAGENTA);
+    init_pair(ATTACK_COLOR, COLOR_BLACK, COLOR_RED);
     getmaxyx(stdscr, maxy, maxx);
     setMaxxy(maxx, maxy);
     char ch = 0;

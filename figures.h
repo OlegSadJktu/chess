@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include "field.h"
+/* #include "figures.h" */
 
 enum FigureType {
     PAWN,
@@ -14,12 +15,14 @@ enum FigureType {
 };
 
 typedef struct Pos Pos;
+typedef struct Field Field;
 
-typedef int (*checker_f)(Pos*, Pos*);
 
 enum Team {
     BLACK, WHITE,
 };
+
+typedef int (*checker_f)(Pos*, Pos*, Field*, enum Team);
 
 struct Figure {
     enum FigureType type;
@@ -29,5 +32,7 @@ struct Figure {
 char getCharByType(enum FigureType type);
 
 checker_f checker(enum FigureType type);
+
+checker_f checkerAttack(enum FigureType);
 
 #endif 
