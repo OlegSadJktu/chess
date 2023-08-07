@@ -11,6 +11,7 @@
 #define CAN_MOVE 3
 #define CAN_ATTACK 4
 #define ATTACK_COLOR 5
+#define FIGURE_SELECT_COLOR 6
 
 void setMaxxy(int x, int y) ;
 

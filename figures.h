@@ -19,7 +19,7 @@ typedef struct Field Field;
 
 
 enum Team {
-    BLACK, WHITE,
+    BLACK = 0, WHITE = 1,
 };
 
 typedef int (*checker_f)(Pos*, Pos*, Field*, enum Team);
@@ -27,6 +27,7 @@ typedef int (*checker_f)(Pos*, Pos*, Field*, enum Team);
 struct Figure {
     enum FigureType type;
     enum Team team;
+	int moves;
 };
 
 char getCharByType(enum FigureType type);

@@ -24,6 +24,11 @@ static void getBounds(int *top, int *left) {
     *top = maxy / 2 - FVS / 2;
 }
 
+static void getRightBottomBounds(int *bottom, int *right) {
+	*right = maxx / 2 + FHS / 2;
+	*bottom = maxy / 2 + FVS / 2;
+}
+
 
 void printFieldBounds(int maxx, int maxy) {
     int leftbound, topbound;
@@ -92,6 +97,9 @@ static void printCell(Offsets *off, int index, struct Field *field) {
                     attron(COLOR_PAIR(CAN_ATTACK));
                 }
             }
+			if (field->selectedPiece == index) {
+				attron(COLOR_PAIR(FIGURE_SELECT_COLOR));
+			}
 
         }
         printFigure(pieceOnCell, &indPos);
@@ -116,12 +124,14 @@ static void printCell(Offsets *off, int index, struct Field *field) {
 
 void printField(int maxx, int maxy, struct Field *field) {
     printFieldBounds(maxx, maxy);
-    int left, top;
+    int left, top, right, bottom;
     getBounds(&top, &left);
+	getRightBottomBounds(&bottom, &right);
     for (int index = 0; index < FIELD_SIZE; index++) {
-
         Offsets off = {top, left};
         printCell(&off, index, field);
     }
+	mvaddstr(top, right + 1, field->teamMove == WHITE ? "Move white" : "Move black");
+
 }
 

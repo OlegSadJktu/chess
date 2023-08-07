@@ -4,6 +4,7 @@ static struct Figure *createFigure(enum Team team, enum FigureType type) {
     struct Figure *figure = malloc(sizeof(struct Figure));
     figure->team = team;
     figure->type = type;
+	figure->moves = 0;
     return figure;
 };
 
@@ -24,6 +25,7 @@ void createFigures(struct Cell *cells, enum Team team) {
 struct Field *createDefaultField() {
     struct Field *field = malloc(sizeof(struct Field));
     field->selectedPiece = -1;
+	field->teamMove = WHITE;
     struct Cell *cells = field->cells;
     char pos[2] = "a2";
 
@@ -93,6 +95,15 @@ static int curToIndex(struct Field *field) {
     return posToIndex(field->curx, field->cury);
 }
 
+
+void changeMove(struct Field *field) {
+	if (field->teamMove == WHITE) {
+		field->teamMove = BLACK;
+	} else {
+		field->teamMove = WHITE;
+	}
+}
+
 void selectF(struct Field *field) {
     int index = curToIndex(field);
     struct Figure *fig = field->cells[index].piece;
@@ -112,10 +123,13 @@ void selectF(struct Field *field) {
         return;
     }
     if (fig == NULL && checker(selected->type)(&selPos, &curPos, field, selected->team)) {
+		field->cells[field->selectedPiece].piece->moves += 1;
         field->cells[index].piece 
             = field->cells[field->selectedPiece].piece;
         field->cells[field->selectedPiece].piece = NULL;
         field->selectedPiece = -1;
+		/* changeMove(field); */
+		/* fig->moves += 1; */
     } else {
         int curInd = possToIndex(&curPos);
         if (field->cells[curInd].piece == NULL) {
@@ -125,12 +139,11 @@ void selectF(struct Field *field) {
         if (f(&selPos, &curPos, field, selected->team)) {
             attack(field, &selPos, &curPos);
             field->selectedPiece = -1;
+			fig->moves += 1;
+			changeMove(field);
         }
 
     }
-
-
-
 }
 
 void attack(struct Field *field, struct Pos *attack, struct Pos *defense) {

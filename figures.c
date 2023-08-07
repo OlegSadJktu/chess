@@ -40,6 +40,10 @@ static void absDeltas(struct Pos *p1, struct Pos *p2, int *dx, int *dy) {
     *dx = abs(*dx);
 }
 
+static struct Figure *findFigure(struct Field *field, struct Pos *pos) {
+	return field->cells[possToIndex(pos)].piece;
+}
+
 
 int samePos(struct Pos *p1, struct Pos *p2) {
     return p1->x == p2->x && p1->y == p2->y;
@@ -47,13 +51,18 @@ int samePos(struct Pos *p1, struct Pos *p2) {
 
 static int pawnMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     if (samePos(pos, move)) return 0;
+	struct Figure *fig = findFigure(field, pos);
     int dx, dy;
     deltas(pos, move, &dx, &dy);
     dy = dy * (team == WHITE ? 1 : -1);
-    if (dy == 1 && dx == 0) {
-        return 1;
-    }
-    return 0;
+	if (fig->moves == 0) {
+		return (dy == 1 || dy == 2) && dx == 0;
+	}
+	return dy == 1 && dx == 0;
+    /* if (dy == 1 && dx == 0) { */
+    /*     return 1; */
+    /* } */
+    /* return 0; */
 }
 
 int kingMoveChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
@@ -112,6 +121,7 @@ static int allMoveAllowed(struct Pos *pos, struct Pos *move, struct Field *field
     if (samePos(pos, move)) return 0;
     return 1;
 }
+
 
 static int pawnAttackChecker(struct Pos *pos, struct Pos *move, struct Field *field, enum Team team) {
     enum Team eTeam = field->cells[possToIndex(move)].piece->team;

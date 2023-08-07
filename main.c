@@ -58,6 +58,7 @@ int main() {
     init_pair(CAN_MOVE, COLOR_BLACK, COLOR_YELLOW);
     init_pair(CAN_ATTACK, COLOR_BLACK, COLOR_MAGENTA);
     init_pair(ATTACK_COLOR, COLOR_BLACK, COLOR_RED);
+	init_pair(FIGURE_SELECT_COLOR, COLOR_BLUE, COLOR_WHITE);
     getmaxyx(stdscr, maxy, maxx);
     setMaxxy(maxx, maxy);
     char ch = 0;

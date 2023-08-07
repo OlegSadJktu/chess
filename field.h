@@ -21,7 +21,7 @@ struct Field {
     int curx, cury;
     // default -1
     int selectedPiece;
-
+	int teamMove;
 };
 
 struct Pos {
